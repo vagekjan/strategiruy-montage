@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Стратегируй · сырой и монтаж</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%232f2f33'/><text x='32' y='45' font-size='34' font-family='Georgia,serif' fill='%23fff' text-anchor='middle'>≡</text></svg>">
+<style>
+:root{
+  --ink:#2b2b30;--ink2:#3c3c43;--mut:#6e6e73;--dim:#9a9aa0;--line:#ebebf0;--line2:#f4f4f7;
+  --green:#2f7d4f;--green-bg:#f3f9f5;--green-ln:#4a9c6b;
+  --red:#b03a30;--red-bg:#fdf5f4;--red-ln:#cd5a4e;
+  --grey:#8a8a90;--grey-bg:#fafafb;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:var(--ink);font:400 16px/1.68 -apple-system,"Helvetica Neue",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:40px clamp(16px,3vw,32px) 90px}
+h1{font-size:25px;font-weight:600;letter-spacing:-.01em}
+.lead{color:var(--mut);margin-top:9px;font-size:14.5px;max-width:74ch}
+
+.legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:20px;padding:13px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13.5px;color:var(--mut)}
+.legend i{font-style:normal;display:inline-flex;align-items:center;gap:8px}
+.legend b{width:12px;height:12px;border-radius:3px;display:block}
+.legend .g b{background:var(--green-ln)}
+.legend .r b{background:var(--red-ln)}
+.legend .s b{background:#cfcfd4}
+
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 4px;align-items:center}
+.bar button{font:500 13px -apple-system,sans-serif;padding:7px 14px;border:1px solid var(--line);
+  background:#fff;border-radius:7px;cursor:pointer;color:var(--ink2)}
+.bar button:hover{border-color:#d8d8de}
+.bar button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.bar .cnt{margin-left:auto;font-size:13px;color:var(--dim)}
+
+.cols-head{position:sticky;top:0;z-index:5;background:#fff;display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(14px,2.2vw,28px);padding:12px 0 11px;border-bottom:1.5px solid var(--ink);margin-top:14px}
+.cols-head div{display:flex;align-items:baseline;gap:9px}
+.cols-head em{font-style:normal;font:600 16px -apple-system,sans-serif;color:var(--ink)}
+.cols-head span{font:400 12px -apple-system,sans-serif;color:var(--dim)}
+@media(max-width:780px){.cols-head{display:none}}
+
+.t{padding:22px 0 24px;border-top:1px solid var(--line);position:relative}
+.t:first-child{border-top:0}
+.t .head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:13px}
+.t .num{font:500 12px ui-monospace,SFMono-Regular,monospace;color:var(--dim)}
+.t .ttl{font-size:16.5px;font-weight:600;letter-spacing:-.005em}
+.t .st{font:600 11px -apple-system,sans-serif;letter-spacing:.13em;text-transform:uppercase;
+  padding:3px 9px;border-radius:5px;margin-left:auto}
+
+.t.keep .ttl{color:var(--green)}
+.t.keep .st{background:var(--green-bg);color:var(--green)}
+.t.cut .ttl{color:var(--red)}
+.t.cut .st{background:var(--red-bg);color:var(--red)}
+.t.svc .ttl{color:var(--grey)}
+.t.svc .st{background:var(--grey-bg);color:var(--grey)}
+
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.2vw,28px);align-items:start}
+@media(max-width:780px){.duo{grid-template-columns:1fr;gap:12px}}
+.duo .side{padding:13px 16px;border-radius:8px;font-size:15px;line-height:1.62}
+.duo .lab{display:none}
+@media(max-width:780px){.duo .lab{display:block;font:600 10.5px -apple-system,sans-serif;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}}
+
+.t.keep .duo .raw{background:var(--green-bg);border-left:3px solid var(--green-ln);color:#24402f}
+.t.cut  .duo .raw{background:var(--red-bg);border-left:3px solid var(--red-ln);color:#4a2420}
+.t.svc  .duo .raw{background:var(--grey-bg);border-left:3px solid #cfcfd4;color:var(--mut)}
+.t.keep .duo .mon{background:var(--green-bg);border-left:3px solid var(--green-ln);color:#24402f}
+.t.cut  .duo .mon{background:transparent;border-left:3px solid var(--red-ln);color:var(--red);
+  font-weight:500;display:flex;align-items:center;gap:9px}
+.t.svc  .duo .mon{background:transparent;border-left:3px solid #cfcfd4;color:var(--grey);font-size:14px}
+.duo .mon .tc{font:500 11.5px ui-monospace,monospace;color:var(--dim);display:block;margin-bottom:5px}
+.duo .mon .x{font-size:17px;line-height:1}
+.duo .raw.none{background:#fafafb;border-left:3px solid #e2e2e7;color:var(--dim);font-size:14px}
+.t .note{margin-top:11px;font-size:13.5px;color:var(--mut);line-height:1.55}
+.t .note:before{content:"→ ";color:var(--dim)}
+mark{background:#fff3cd;color:inherit;padding:0 3px;border-radius:2px}
+
+
+/* ===== режим правок ===== */
+.decide{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;margin-top:14px;
+  padding-top:13px;border-top:1px dashed var(--line)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;flex:none}
+.seg button{border:0;background:#fff;padding:9px 15px;cursor:pointer;font:600 13px -apple-system,sans-serif;
+  color:var(--mut);border-right:1px solid var(--line);transition:.13s;white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:#f7f7f9;color:var(--ink)}
+.seg button.on{color:#fff}
+.seg button.on[data-dec="keep"]{background:var(--green);border-color:var(--green)}
+.seg button.on[data-dec="cut"]{background:var(--red);border-color:var(--red)}
+.mnote{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 14px;
+  font:400 15px/1.55 -apple-system,sans-serif;color:var(--ink);background:#fff;transition:border-color .13s,background .13s;
+  resize:vertical;min-height:64px;max-height:460px;display:block;overflow-y:auto}
+.mnote::placeholder{color:#b4b4bb}
+.mnote:focus{outline:none;border-color:#9a9aa0;background:#fcfcfd;box-shadow:0 0 0 3px rgba(43,43,48,.05)}
+.decide{align-items:start}
+@media(max-width:820px){.decide{grid-template-columns:1fr;gap:10px}.seg{width:100%}.seg button{flex:1}}
+.t.changed{background:#fffaf2}
+.t.changed:before{content:"изменено";position:absolute;right:0;top:24px;font:600 10px -apple-system,sans-serif;
+  letter-spacing:.12em;text-transform:uppercase;color:#b0772c;background:#fdf1df;padding:3px 9px;border-radius:5px}
+
+.panelbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);
+  padding:14px 0 13px;margin-bottom:4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.panelbar .sum{font-size:14px;color:var(--mut);flex:1;min-width:260px}
+.panelbar .sum b{color:var(--ink);font-weight:600}
+.panelbar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 16px;cursor:pointer;
+  font:600 13px -apple-system,sans-serif;color:var(--ink2);transition:.13s}
+.panelbar button:hover{border-color:#cfcfd6}
+.panelbar button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.panelbar button.primary:hover{background:#3d3d44}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);z-index:50;
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:9px;font:600 13.5px -apple-system,sans-serif;
+  opacity:0;pointer-events:none;transition:.22s;box-shadow:0 12px 30px rgba(0,0,0,.2)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+h2{font-size:18px;font-weight:600;margin:52px 0 8px}
+h2+p{color:var(--mut);font-size:14px;max-width:74ch}
+ul.flat{list-style:none;margin-top:14px;border-top:1px solid var(--line)}
+ul.flat li{padding:13px 0;border-bottom:1px solid var(--line2);font-size:14.5px;color:var(--ink2);
+  display:grid;grid-template-columns:168px 1fr;gap:16px}
+@media(max-width:700px){ul.flat li{grid-template-columns:1fr;gap:3px}}
+ul.flat li b{font-weight:600;color:var(--red)}
+details.src-d{margin-top:22px}
+details.src-d summary{list-style:none;cursor:pointer;font-size:12.5px;color:var(--dim);padding:6px 0;
+  display:flex;align-items:center;gap:7px}
+details.src-d summary::-webkit-details-marker{display:none}
+details.src-d summary:before{content:"+"}
+details.src-d[open] summary:before{content:"–"}
+.src{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:12px 0 2px}
+@media(max-width:760px){.src{grid-template-columns:1fr;gap:12px}}
+.src div b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.src div p{font-size:13.5px;color:var(--ink2);line-height:1.5}
+.src div p span{color:var(--mut)}
+footer{margin-top:46px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--dim);line-height:1.6}
+@media print{.bar{display:none}.t{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>«Стратегируй 2027» · что сказано на съёмке и что осталось в монтаже</h1>
+  <p class="lead">Текст разобран по тезисам. Слева то, что сказано на съёмке, справа то, что осталось в ролике. Зелёный тезис вошёл в монтаж, красный вырезан, серый — реплика площадки.</p>
+
+  <div class="legend">
+    <i class="g"><b></b>вошло в монтаж</i>
+    <i class="r"><b></b>вырезано из монтажа</i>
+    <i class="s"><b></b>реплика площадки</i>
+  </div>
+
+  <div class="bar">
+    <button class="on" data-f="all">Все тезисы</button>
+    <button data-f="keep">Только вошедшее</button>
+    <button data-f="cut">Только вырезанное</button>
+    <span class="cnt" id="cnt"></span>
+  </div>
+
+  <div class="cols-head">
+    <div><em>Сырой</em><span>17:31 · съёмка целиком</span></div>
+    <div><em>Монтаж</em><span>04:02 · готовый ролик</span></div>
+  </div>
+  <div class="panelbar">
+    <div class="sum" id="mSum"></div>
+    <button id="mCopy">Скопировать монтажный лист</button>
+    <button id="mDl">Скачать TXT</button>
+    <button id="mReset">Сбросить правки</button>
+  </div>
+  <div id="lenta"></div>
+
+  <h2>Чего лишился монтаж</h2>
+  <p>Смысловые пласты из съёмки, не попавшие в ролик. Готовый запас для текстов форума.</p>
+  <ul class="flat" id="cuts"></ul>
+
+  <h2>Расхождения, которые надо уточнить</h2>
+  <p>Имена и числа ниже приведены так, как прозвучали в каждом источнике. Ни один не выбран как верный.</p>
+  <ul class="flat" id="quest"></ul>
+
+  <details class="src-d">
+    <summary>Источники файлов</summary>
+    <div class="src">
+      <div><b>Сырой</b><p>C0138.MP4 · 17 мин 31 с · расшифровка Буквицы<br><span>съёмка целиком: дубли, самоповторы, реплики площадки</span></p></div>
+      <div><b>Монтаж</b><p>Стратегируй — финал.mp4 · 4 мин 02 с · локальная расшифровка с таймкодами<br><span>распознавание неточное на именах и названиях</span></p></div>
+    </div>
+  </details>
+
+  <footer id="foot"></footer>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const ROWS = [
+ {tag:"keep", raw:"Так, все, я готов. Нужно признать, российский бизнес сегодня находится в ситуации шторма, зашкаливающих темп изменений, сжимающихся спрос, давления ключевых макроэкономических факторов, неопределенность на максималках, усталость металла ключевых людей.",
+  tc:"00:00", fin:"Нужно признать, российский бизнес сегодня находится в ситуации шторма, зашкаливающий темп изменений, сжимающийся спрос, давление ключевых макроэкономических факторов, неопределенность на максималках, усталость металла ключевых людей.",
+  note:"Служебное «Так, все, я готов» снято. Формулировка шторма осталась дословно."},
+
+ {tag:"keep", raw:"Ключевые люди, которые тащат компанию вперед в последние годы испытали столько стресса, столько перестроек, столько трансформаций, что им тяжело держать курс.",
+  tc:"00:25", fin:"Ключевые люди, которые тащат компании вперед, последние годы, испытали столько стресса, столько перестроек, столько трансформаций, что именно тяжело лежать в курс.",
+  note:"Та же мысль. Расхождение только в распознавании финала."},
+
+ {tag:"cut", raw:"",
+  tc:"00:15", fin:"Я вижу, что текущий год один из самых тяжелых для бизнеса. Мы это просто по цифрам, по статистике видим. Я вижу, как сотни тысячи компаний уходят с рынка. … Есть одна вещь, которая меня обнахновляет. Я вижу, что есть причины в пасть в уныне. И при этом я вижу лично десятки глаз людей, которые отказываются это делать. Я вижу маленькие и крупные компании, которые в текущих флориах растут, которые отказываются принимать тот факт, что в целом там рынки падают.",
+  note:"Целый блок финала, которого нет в съёмке C0138: личное наблюдение Филиппа и разворот от уныния к растущим компаниям. Значит, финал смонтирован не только из этого исходника.", inv:true},
+
+ {tag:"cut", raw:"И при этом мы понимаем, что есть компании, которые тонущие на падающих и дрейфующих рынках, есть целевые чемпионы, есть великие, а не большие компании, которые находят в этом вот отраслевом спаде тот эффект, что отрасль не проваливается вся сразу. А есть карманно-нишевой рост. Перестраивается сфера спроса, возникают вот эти вот аномалии, где мы видим, что потребности меняются, возникает новая ниша.",
+  fin:"", note:"Вся типология компаний и объяснение механики нишевого роста в ролик не вошли."},
+
+ {tag:"keep", raw:"Вот я знаю десятки организаций сегодня, которые ловят этот эффект, на нем растут.",
+  tc:"00:55", fin:"Вот я знаю десятки организаций сегодня, которые обомят этот эффект, на нем растут.",
+  note:"Дословно. В финале «ловят» распозналось как «обомят»."},
+
+ {tag:"keep", raw:"Они не просто удерживают позиции, а действительно как будто питаются этим хаосом, неопределенностью и средой повышенного риска.",
+  tc:"01:00", fin:"Они не просто удерживают позиции, а действительно как будто бы питаются этим хаосом неопределенностью и средой повышенного риска.",
+  note:"Дословно."},
+
+ {tag:"cut", raw:"Главная связка, которую я вижу. Мы с коллегами много изучаем эти компании. Смотрим, что именно и как они делают в рынке. Какие стратегии используют. Мы смотрим, как работают внутри компании. Со структурой, системой, с процессами, с культурой. Что делают с топ-командами. Какие конкретно практики используют. И главное, как лидеры этих организаций направляются в руль.",
+  fin:"", note:"Доказательная база: как именно изучались компании. Снято целиком."},
+
+ {tag:"cut", raw:"Где эти тонкие инструменты, настройки внутренней оптики, которая позволяет в сложной, патовой, тяжелой, кризисной ситуации скручиться и питаться этим стрессом, а не вливаться в него.",
+  fin:"", note:"Формулировка про внутреннюю оптику лидера. Снято."},
+
+ {tag:"cut", raw:"",
+  tc:"01:09", fin:"Каждом кризисе происходит такая чистка леса, пожар вычищает, как бы да, под лесок прорастают новые деревья.",
+  note:"Обратный случай: метафора пожара есть в финале, но её нет в этой съёмке. Значит, финал смонтирован не только из C0138.", inv:true},
+
+ {tag:"keep", raw:"Компании, которые растут в текущей ситуации, эффективны в трех измерениях адаптивной стратегии.",
+  tc:"01:15", fin:"Компании, которые растут в текущей ситуации, эффективны в трёх измерениях адаптивной стратегии.",
+  note:"Дословно. Опорная конструкция всего ролика."},
+
+ {tag:"keep", raw:"Первое, они умеют сушить пор, сушить лидер бизнеса, делать процессы эффективными. Они умеют быть по-хорошему немцами, которые простраивают логику процесса, проклеивают швы между функциями, наждачкой-глубевочкой шлифуют все, чтобы быть максимально эффективными, чтобы бизнес-модель выдерживала возросшую нагрузку. Д — дисциплина. П — порядок. М — метрики.",
+  tc:"01:22", fin:"Первое, они умеют быть по-хорошему немцами, которые простраивают логику процесса, проклеивают швы между функциями, наждачкой, нулёвочкой, шлифуют всё, чтобы быть максимально эффективными, чтобы бизнес-падель выдерживала возросшую нагрузку. D — дисциплина, P — порядок, M — метрики.",
+  note:"Начало фразы про «сушить» срезано, дальше дословно."},
+
+ {tag:"cut", raw:"Простроенный процесс — это такая душная, дотошная, внимательная, четкая работа. Как ее сделать, как найти лучшие практики, чтобы это реализовать? Мы собираем по всему миру, полисочным вот это.",
+  fin:"", note:"Развёртка первого измерения и обещание собрать мировые практики. Снято."},
+
+ {tag:"keep", raw:"Очень важно быть максимально включенным итальянцем, который не вылезает из клиентских звонков, встреч, конференций, который идет в рынок и, чувствуя кожи и тренды, забирает бизнес на горизонте 6–12 месяцев.",
+  tc:"01:44", fin:"Второе, очень важно быть максимально включённым итальянцам, который не вылезает из клиентских звонков, встреч, конференций, который идёт в рынок и чувствуя кожей тренды, забирает бизнес на горизонте 6-12 месяцев.",
+  note:"Дословно."},
+
+ {tag:"cut", raw:"Где возникающие ниши спроса, где поставщики, партнеры, коллеги, с кем можно сделать эффективные коллаборации, что хотят сегодня клиенты, в чем их запрос, который они пока еще, может быть, даже сами не артикулируют точно. Вот как чувствовать на кончиках пальцев рынок? Мы собираем конкретные практики, которые позволяют в ключевых демократиях это результат.",
+  fin:"", note:"Расшифровка второго измерения. Снято."},
+
+ {tag:"keep", raw:"И третий вопрос очень жесткий: что убьет твою бизнес модель через 2–3 года? Очень важно это понять и с позиции визионера это увидеть. И сегодня начать строить маленькими спинтами, экспериментами тестового гипотеза. Эту бизнес-модель.",
+  tc:"02:00", fin:"И третий вопрос очень жёсткий, что убьёт твою бизнес-модель через 2-3 года? Очень важно это понять и из позиции визионера это увидеть. И сегодня начать строить маленькими спринтами, экспериментами, тестами гипотез, эту бизнес-модель.",
+  note:"Дословно."},
+
+ {tag:"cut", raw:"Как быть одновременно таким дотошным строителем эффективной организации, быстрым, контактным, чутким камеражером, коммерсантом, который собирает с рынка деньги, и визионером, который видит, куда придет рынок.",
+  fin:"", note:"Сведение трёх ролей в одну фигуру. Снято, хотя это замок всей конструкции."},
+
+ {tag:"cut", raw:"Форум стратегии нужен для того, чтобы ключевые люди могли взять этот майнсет, могли встать в позицию современного стратега. Одновременно усиливать сегодняшний бизнес, находить точки роста для завтрашнего и строить послезавтрашний.",
+  fin:"", note:"Формула «сегодняшний, завтрашний, послезавтрашний бизнес». Снято."},
+
+ {tag:"keep", raw:"И вот то, в чем сейчас дух времени. Middle — это новый топ. Сегодня всем нужны люди на средних позициях в организации, которые способны запускать новые предпринимательские проекты для компаний. Причем как в отношении клиента, так и в внутренней организации и в системах.",
+  tc:"02:17", fin:"И вот то, в чём сейчас дух времени. Мидл это новый топ. Сегодня всем нужны люди на средних позициях в организации, которые способны запускать новые предпринимательские проекты для компании.",
+  note:"Тезис оставлен, уточнение про клиента и внутренние системы срезано."},
+
+ {tag:"keep", raw:"Вот именно на этом опыте конкретных решений мы собираем наш большой антистресс форум «Стратегируй 2027». На кампусе Сбер университета 20 и 21 ноября.",
+  tc:"02:32", fin:"Именно на этом опыте конкретных решений. Мы собираем наш большой антистресс-форум, стратегирует 2027.",
+  note:"Площадка и даты в этом месте финала не названы, они перенесены в самый конец ролика."},
+
+ {tag:"keep", raw:"Миссия форума в том, чтобы помочь собственникам компаний и ключевым топ-менеджерам и самым главным игрокам из команд, то есть тем, на ком делится бизнес, тем, кто его драйвит, тем, кто его тащит вперед. Сделать три вещи: найти актуальные точки роста, выстроить систему бизнеса так, чтобы она держала удар и выдерживала хаос, и найти личную энергию, чтобы все это реализовать.",
+  tc:"02:40", fin:"Миссия форума в том, чтобы помочь собственным компаниям и их ключевым топ-менеджерам сделать три вещи. Найти актуальные точки роста, выстроить систему бизнеса так, чтобы она держала удар и выдерживала хаос и найти личную энергию, чтобы всё это реализовать.",
+  note:"Три задачи дословно. Расшифровка адресата «тем, на ком держится бизнес» в финале сокращена."},
+
+ {tag:"cut", raw:"Антистресс форум про то, как не слиться и не убиться, а сделать дело в четвертом квартале и сделать задел на двадцать седьмой год.",
+  fin:"", note:"Самая разговорная и цепкая формулировка пользы. Снята."},
+
+ {tag:"cut", raw:"Это форум для того, чтобы активировать сильно, чтобы поддержать компанию и тех, кто драйвит бизнес. Всегда есть 5, 7, 10 человек, от кого максимально зависит результат. Нам очень важно, чтобы у этих людей были стратегии не токсичной выжигающей эффективности, а экологичной поддерживающей эффективности. Чтобы они получили допинг, получили поддержку, получили глубокие и точные файлы, как заряжаться в эту ситуацию, а не растрачиваться на ней.",
+  fin:"", note:"Противопоставление выжигающей и экологичной эффективности плюс счёт ключевых людей. Снято целиком."},
+
+ {tag:"keep", raw:"Как устроен форум? Это два дня кумуарного общения с топовыми людьми из лучших компаний страны. Первый день мы послойно разбираем ситуацию, создавая силу ясного понимания, что происходит. Мы начинаем с больших трендов. … Вот в первый день мы спокойно, без спешки, просто вот начинаем как бы разбирать вот эту пазду, создавая такое пробьётое полифоничное видение ситуации.",
+  tc:"02:52", fin:"Это два дня куларного общения с топовыми людьми из лучшей компании страны. Первый день мы послойно разбираем ситуацию, начинаем с больших трендов, куда вообще всё идёт.",
+  note:"«Создавая силу ясного понимания» срезано."},
+
+ {tag:"cut", raw:"И главное, как эти тренды воспринимают самые опытные собственники SEO. И как на эти же тренды смотрят супер эффективные молодые айтишные команды. Мы с разных камер, через разные отношения к происходящему вовне разных людей собираем максимально адекватную картину того, что будет влиять на бизнес.",
+  fin:"", note:"Объяснение, почему картина трендов получается объёмной. Снято."},
+
+ {tag:"keep", raw:"Вторым слоем мы разбираем, а что происходит в компании, как ваша организация отвечает на эти вызовы, что в структурах, в системах, что в процессах, что в культуре, какие ключевые точки напряжения, какие ключевые возможности роста.",
+  tc:"03:04", fin:"Вторым слоем мы разбираем, а что происходит в компании.",
+  note:"От слоя остался заголовок, всё содержание срезано."},
+
+ {tag:"keep", raw:"Третий слой — команда. Как этим всем управляет или не управляет ваша топ-команда, ваша ключевая когорта эффективных специалистов. И последний слой: а где моя роль в этом? Где проекция всей ситуации в меня?",
+  tc:"03:09", fin:"Третий слой команда и последний слой, а где моя роль в этом?",
+  note:"Оба слоя названы, раскрытие срезано."},
+
+ {tag:"cut", raw:"Что во мне ситуация пробуждает? Что во мне активирует или подавляет ситуацию? Являюсь ли я такой, знаете, «больчий собакой», нос холодный, хвост пушистый, активно и включенно ведущий последователь? Что меня вышибает, что меня тревожит, что меня выхлёстывает, а что у меня прям получается хорошо? То есть как эта ситуация проецируется в меня как вахтера? Где проявляется и подавляется моя субъектность?",
+  fin:"", note:"Самый личный кусок про субъектность вместе с метафорой собаки. Снят полностью."},
+
+ {tag:"svc", raw:"Говорю понятно или нет? По-моему, хорошо. Ну, такая естественная речь. Я вас понял. Все с первого дубля даже.",
+  fin:"", note:"Реплики площадки."},
+
+ {tag:"keep", raw:"Второй день — день сборки. Мы смотрим, что важно сделать на рынке, какие проекты на рынке запустить, какие возможности активировать, как это поддержать две компании, как это усилить через командное взаимодействие и что конкретно я должен сделать, чтобы полетел.",
+  tc:"03:12", fin:"Родень, день сборки, какие проекты на руки запустить, как это поддержать внутри компании?",
+  note:"Сжато до двух вопросов. Про командное взаимодействие и личное действие срезано."},
+
+ {tag:"keep", raw:"Форум — это способ дать воздуха, дать простора, дать мотивации, дать энергию, чтобы они сделали эти важные ключевые дела. Форум — это пит-стоп для ключевой команды вашей Формулы-1. Способ остановиться на пару дней, чтобы добежать спринг года качественно и создать энергию на следующий год.",
+  tc:"03:18", fin:"Forum это pitstop для ключевой команды вашей формулы 1. Способ остановиться на пару дней, чтобы добежать спринт года качественно.",
+  note:"Метафора питстопа оставлена, «дать воздуха и простора» и «создать энергию на следующий год» срезано."},
+
+ {tag:"keep", raw:"У нас будет Сергей Кирш из компании Гильтек это такой beauty cosmo tech организация которая на рынке где миллионы сколюксов от этого лица на <mark>Wildberries</mark> растет вот клюшкой с многомиллиардной базой в текущем году показывает плясачьи результаты.",
+  tc:"03:25", fin:"У нас будет <mark>Сергей Хирш</mark> из компании <mark>Angel Tech</mark>, это такой beauty cosmo tech организация. Там <mark>Wilderness</mark> растет клюшкой с многомиллиардной базы.",
+  note:"Фамилия и название компании звучат по-разному в двух расшифровках. Маркетплейс слева распознан как Wildberries, справа как Wilderness."},
+
+ {tag:"cut", raw:"И Сергей поделится, как они запускают эту ракету роста, на каких принципах это строят, какие кейсы используют, максимально послушаем его и пообщаемся с ним.",
+  fin:"", note:"Анонс содержания выступления. Снято."},
+
+ {tag:"keep", raw:"У нас будет <mark>Евгений Рейнер</mark> из Самары. Это мощная ресторанная сеть <mark>80 ресторанов</mark>, растущих в текущих условиях. … Будет <mark>гений Рейнберг</mark>, такой выдающийся ресторанер из Самары, у него там <mark>около 70 ресторанов</mark>.",
+  tc:"03:38", fin:"Будет <mark>Евгений Реймер</mark>, такой выдающийся ресторантор из <mark>Самар</mark>, у него там <mark>около 73 ресторанов</mark>.",
+  note:"Три разных числа ресторанов и три написания фамилии. В сырой съёмке два дубля подряд дают 80 и около 70."},
+
+ {tag:"keep", raw:"Не просто про бизнес, как говорит Филипп. Я, конечно, такая миссия — это вернуть Самаре статус хлебной столицы России. … У меня цель сделать Самару хлебной столицей России. … Мне важно, чтобы собственники одновременно могли очень эффективно работать в операционке и в этом не теряли большого смысла и творческого импульса.",
+  tc:"03:41", fin:"Говорит Филипп, вот я, значит, моя миссия — это вернуть в Самаре статус «Хлебные столицы России».",
+  note:"Миссия вошла в ролик."},
+
+ {tag:"cut", raw:"Не 3,5 миллиона туристов в год, а 5. … Чтобы было не 3,5, а 5 миллионов туристов в год к <mark>2050</mark> году. … И мне хочется, чтобы в Самаре было не 3,5, а 5 миллионов туристов в год в <mark>2020</mark> году.",
+  fin:"", note:"Цифра туристов в финал не вошла. В сырой записи год звучит по-разному в разных дублях."},
+
+ {tag:"svc", raw:"А вы сможете еще раз эту фразу, чтобы она цельно поинтонировалась? Да, цельно. … Сейчас стопну, перезапущу.",
+  fin:"", note:"Реплики площадки и указания на перезапуск дубля."},
+
+ {tag:"cut", raw:"Вот на форуме будет совместная такая кладная камерная работа, да, во мимо выступлений со сценой. Будем прямо вместе общаться и вместе разбирать вот этот вот аккумулятор бизнеса и находить конкретные точки роста.",
+  fin:"", note:"Формат камерной работы помимо выступлений со сцены. Снято."},
+
+ {tag:"keep", raw:"",
+  tc:"03:52", fin:"Приезжайте 20-21 ноября, а возьмём университет на Кампус. Напишите в комментариях слово «антистресс», и мы пришлём вам программу форума и ссылку на участие.",
+  note:"Призыв к действию собран в финале. В сырой съёмке даты и площадка звучали в середине, а слова про комментарий не было вовсе.", inv:true}
+];
+
+const TITLES = [
+ "Шторм в российском бизнесе",
+ "Усталость ключевых людей",
+ "Личное наблюдение: год тяжёлый, но есть те, кто растёт",
+ "Типология компаний и нишевый рост",
+ "Десятки растущих организаций",
+ "Питаются хаосом",
+ "Как изучались растущие компании",
+ "Внутренняя оптика лидера",
+ "Метафора пожара и чистки леса",
+ "Три измерения адаптивной стратегии",
+ "Первое измерение: немец, дисциплина, порядок, метрики",
+ "Развёртка первого измерения и мировые практики",
+ "Второе измерение: включённый итальянец",
+ "Развёртка второго измерения: ниши и коллаборации",
+ "Третье измерение: что убьёт бизнес-модель через 2–3 года",
+ "Три роли в одной фигуре",
+ "Позиция современного стратега",
+ "Мидл — это новый топ",
+ "Антистресс-форум: площадка и даты",
+ "Миссия форума и три задачи",
+ "Не слиться и не убиться",
+ "Экологичная эффективность вместо выжигающей",
+ "Устройство форума: два дня, первый слой — тренды",
+ "Тренды глазами собственников и айтишных команд",
+ "Второй слой: что происходит в компании",
+ "Третий и четвёртый слой: команда и я",
+ "Четвёртый слой: субъектность",
+ "Реплики площадки о понятности речи",
+ "Второй день: день сборки",
+ "Питстоп для Формулы-1",
+ "Спикер Сергей и его компания",
+ "Что расскажет Сергей",
+ "Спикер из Самары и его сеть ресторанов",
+ "Миссия: хлебная столица России",
+ "Цифра по туристам",
+ "Реплики площадки о перезапуске дубля",
+ "Камерная работа на форуме",
+ "Призыв: даты, площадка, слово «антистресс»"
+];
+
+const CUTS = [
+ ["Цитата ресторатора","«Мне важно, чтобы собственники одновременно могли очень эффективно работать в операционке и в этом не теряли большого смысла и творческого импульса» — прямая речь Евгения, в ролик не вошла."],
+ ["Типология компаний","Тонущие на падающих рынках, целевые чемпионы, великие, а не большие. Отрасль не проваливается вся сразу, есть карманно-нишевой рост и аномалии спроса."],
+ ["Доказательная база","Как именно изучались растущие компании: стратегии в рынке, структура, система, процессы, культура, работа с топ-командами, практики, внутренняя оптика лидеров."],
+ ["Польза разговорными словами","«Не слиться и не убиться, а сделать дело в четвёртом квартале и задел на двадцать седьмой год»."],
+ ["Экологичная эффективность","Противопоставление токсичной выжигающей и экологичной поддерживающей эффективности. Счёт ключевых людей: 5, 7, 10 человек, от кого зависит результат."],
+ ["Фигура современного стратега","Быть одновременно дотошным строителем, контактным коммерсантом и визионером. Усиливать сегодняшний бизнес, искать точки роста для завтрашнего, строить послезавтрашний."],
+ ["Объёмная картина трендов","Тренды глазами опытных собственников и глазами молодых айтишных команд, съёмка «с разных камер»."],
+ ["Четвёртый слой про себя","Где проявляется и подавляется моя субъектность, что меня вышибает и тревожит, метафора собаки с холодным носом."],
+ ["Содержание выступлений","Анонс того, что Сергей расскажет про принципы и кейсы запуска роста."],
+ ["Камерная работа","Помимо выступлений со сцены на форуме будет совместный разбор и поиск конкретных точек роста."],
+ ["Цифра по Самаре","Не 3,5, а 5 миллионов туристов в год."]
+];
+
+const QUEST = [
+ ["Фамилия ресторатора","Сырой: Евгений Рейнер, в другом дубле Рейнберг. Монтаж: Реймер."],
+ ["Число ресторанов","Сырой: 80 ресторанов и в следующем дубле около 70. Монтаж: около 73."],
+ ["Фамилия спикера","Сырой: Сергей Кирш. Монтаж: Сергей Хирш."],
+ ["Компания спикера","Сырой: Гильтек. Монтаж: Angel Tech."],
+ ["Маркетплейс","Сырой: Wildberries. Монтаж: Wilderness. Скорее всего, первое."],
+ ["Год по туристам","Сырой: в одном дубле 2050, в другом 2020."],
+ ["Площадка","Сырой: кампус Сбер университета. Монтаж: распознано неразборчиво."]
+];
+
+/* ===== состояние правок ===== */
+const MKEY="guz-montage-v1";
+let M={};
+function mLoad(){ try{ M=JSON.parse(localStorage.getItem(MKEY)||"{}"); }catch(e){ M={}; } }
+function mSave(){ try{ localStorage.setItem(MKEY, JSON.stringify(M)); }catch(e){} }
+mLoad();
+const baseDec = n => ROWS[n-1].tag==="keep" ? "keep" : "cut";
+const curDec  = n => (M[n] && M[n].dec) ? M[n].dec : baseDec(n);
+const curNote = n => (M[n] && M[n].note) ? M[n].note : "";
+
+const lenta=document.getElementById("lenta");
+function render(f){
+  const items = ROWS.map((r,i)=>({...r, t:TITLES[i]||"", n:i+1}))
+    .filter(r => f==="all" || (f==="keep" ? r.tag==="keep" : r.tag!=="keep"));
+  lenta.innerHTML = items.map(r=>{
+    const label = r.tag==="keep" ? "вошло в монтаж" : r.tag==="cut" ? "вырезано" : "реплика площадки";
+    const rawBody = r.raw
+      ? `<div class="side raw"><span class="lab">Сырой</span>${r.raw}</div>`
+      : `<div class="side raw none"><span class="lab">Сырой</span>В съёмке C0138 этого фрагмента нет, он появился только в монтаже</div>`;
+    const monBody = r.fin
+      ? `<div class="side mon"><span class="lab">Монтаж</span><span class="tc">${r.tc||""}</span>${r.fin}</div>`
+      : `<div class="side mon"><span class="lab">Монтаж</span><span class="x">✕</span><span>${r.tag==="svc"?"не используется":"в монтаж не вошло"}</span></div>`;
+    return `<div class="t ${r.tag}">
+      <div class="head"><span class="num">${String(r.n).padStart(2,"0")}</span>
+        <span class="ttl">${r.t}</span><span class="st">${label}</span></div>
+      <div class="duo">${rawBody}${monBody}</div>
+      <div class="note">${r.note}</div>
+      <div class="decide">
+        <div class="seg">
+          <button data-dec="keep" data-i="${r.n}">В финале</button>
+          <button data-dec="cut" data-i="${r.n}">Убрать</button>
+        </div>
+        <textarea class="mnote" data-mn="${r.n}" rows="2"
+          placeholder="Правка для монтажёра: что вернуть, где подрезать, какой дубль взять.&#10;Enter — новая строка, угол справа снизу тянется мышью"></textarea>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("cnt").textContent =
+    `показано ${items.length} из ${ROWS.length} · вошло ${ROWS.filter(r=>r.tag==="keep").length} · вырезано ${ROWS.filter(r=>r.tag==="cut").length}`;
+  syncDecisions();
+}
+document.querySelectorAll(".bar button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".bar button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); render(b.dataset.f);
+}));
+function syncDecisions(){
+  document.querySelectorAll(".t").forEach(el=>{
+    const b=el.querySelector("[data-i]"); if(!b) return;
+    const n=+b.dataset.i, dec=curDec(n);
+    el.querySelectorAll("[data-dec]").forEach(x=>x.classList.toggle("on", x.dataset.dec===dec));
+    const inp=el.querySelector("[data-mn]");
+    if(inp && inp.value!==curNote(n)) inp.value=curNote(n);
+    if(inp) autoGrow(inp);
+    el.classList.toggle("changed", dec!==baseDec(n));
+  });
+  mStat();
+}
+function mStat(){
+  const back=ROWS.filter((r,i)=>r.tag!=="keep" && curDec(i+1)==="keep").length;
+  const out =ROWS.filter((r,i)=>r.tag==="keep" && curDec(i+1)==="cut").length;
+  const notes=ROWS.filter((r,i)=>curNote(i+1).trim()).length;
+  const el=document.getElementById("mSum");
+  if(el) el.innerHTML = (back||out||notes)
+    ? `Правок по монтажу: <b>вернуть ${back}</b> · <b>убрать ${out}</b> · комментариев ${notes}`
+    : `Правок пока нет. Отметьте, что вернуть из сырого и что убрать из финала.`;
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-dec]");
+  if(b){ const n=+b.dataset.i; M[n]=M[n]||{}; M[n].dec=b.dataset.dec; mSave(); syncDecisions(); }
+});
+function autoGrow(el){
+  el.style.height="0px";
+  const h=Math.max(64, Math.min(el.scrollHeight+2, 460));
+  el.style.height=h+"px";
+}
+document.addEventListener("input",e=>{
+  const i=e.target.closest("[data-mn]");
+  if(i){ const n=+i.dataset.mn; M[n]=M[n]||{}; M[n].note=i.value; mSave(); mStat(); autoGrow(i); }
+});
+
+function montageText(){
+  const d=new Date();
+  const back=[], out=[], notes=[];
+  ROWS.forEach((r,idx)=>{
+    const n=idx+1, dec=curDec(n), note=curNote(n).trim(), ttl=TITLES[idx]||("тезис "+n);
+    if(r.tag!=="keep" && dec==="keep") back.push({n,ttl,note,src:r.raw});
+    if(r.tag==="keep" && dec==="cut") out.push({n,ttl,note,tc:r.tc});
+    if(note && !(r.tag!=="keep"&&dec==="keep") && !(r.tag==="keep"&&dec==="cut")) notes.push({n,ttl,note,tc:r.tc});
+  });
+  let t=`МОНТАЖНЫЙ ЛИСТ · «Стратегируй 2027»\nСформировано: ${d.toLocaleDateString("ru-RU")} ${d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}\n`;
+  t+=`Источники: C0138.MP4 (сырой, 17:31) и «Стратегируй — финал.mp4» (монтаж, 04:02)\n`;
+  t+=`\nВЕРНУТЬ В МОНТАЖ: ${back.length} · УБРАТЬ ИЗ МОНТАЖА: ${out.length} · КОММЕНТАРИЕВ: ${notes.length}\n`;
+  if(back.length){ t+=`\n— ВЕРНУТЬ ИЗ СЫРОГО —\n`;
+    back.forEach(x=>{ t+=`\n${String(x.n).padStart(2,"0")}. ${x.ttl}\n   текст: ${(x.src||"").replace(/<[^>]+>/g,"")}\n`;
+      if(x.note) t+=`   правка: ${x.note.split("\n").join("\n            ")}\n`; }); }
+  if(out.length){ t+=`\n— УБРАТЬ ИЗ ФИНАЛА —\n`;
+    out.forEach(x=>{ t+=`\n${String(x.n).padStart(2,"0")}. ${x.ttl}${x.tc?` (таймкод ${x.tc})`:""}\n`;
+      if(x.note) t+=`   правка: ${x.note.split("\n").join("\n            ")}\n`; }); }
+  if(notes.length){ t+=`\n— КОММЕНТАРИИ БЕЗ СМЕНЫ СТАТУСА —\n`;
+    notes.forEach(x=>{ t+=`\n${String(x.n).padStart(2,"0")}. ${x.ttl}${x.tc?` (таймкод ${x.tc})`:""}\n   ${x.note.split("\n").join("\n   ")}\n`; }); }
+  if(!back.length && !out.length && !notes.length) t+=`\nПравок не внесено.\n`;
+  return t;
+}
+function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("on");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2200); }
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.id==="mCopy"){ const txt=montageText();
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject())
+      .then(()=>toast("Монтажный лист скопирован"))
+      .catch(()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+        ta.select(); try{document.execCommand("copy");toast("Монтажный лист скопирован");}catch(_){toast("Не удалось скопировать");} ta.remove(); }); }
+  if(b.id==="mDl"){ saveMontage(); }
+  if(b.id==="mReset"){ if(confirm("Сбросить все правки по монтажу?\n\nСтатусы вернутся к исходным, комментарии удалятся.")){
+    M={}; mSave(); syncDecisions(); toast("Правки сброшены"); } }
+});
+
+async function saveMontage(){
+  const name=`Монтажный-лист-Стратегируй-${new Date().toISOString().slice(0,10)}.txt`;
+  const text=montageText();
+  try{
+    const dl = window.claude && claude.use ? await claude.use("downloads") : null;
+    if(dl){ await dl.save({filename:name, data:text}); toast("Файл сохранён"); return; }
+  }catch(e){ toast("Сохранение отклонено"); return; }
+  const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
+  const u=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=u; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},400);
+  toast("Файл скачивается");
+}
+
+render("all");
+document.getElementById("cuts").innerHTML = CUTS.map(([t,d])=>`<li><b>${t}</b><span>${d}</span></li>`).join("");
+document.getElementById("quest").innerHTML = QUEST.map(([t,d])=>`<li><b>${t}</b><span>${d}</span></li>`).join("");
+document.getElementById("foot").textContent =
+ "Левая основа: расшифровка Буквицы файла C0138.MP4, 17 мин 31 с. Сверено с локальной расшифровкой файла «Стратегируй — финал.mp4», 4 мин 02 с. Формулировки обоих источников приведены дословно, сопоставление по смыслу сделано вручную.";
+</script>
+</body>
+</html>
